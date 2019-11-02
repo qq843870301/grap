@@ -1,0 +1,37 @@
+@charset "UTF-8";
+// 颜色的基本配置
+$base_color:#00c3a3;//主题色绿色
+$banner_color:#535353;//顶部和底部灰色条的颜色
+$footer_color:#535353;
+
+
+$delete_color:#ffa200;//删除的颜色
+$cancle_color:#cccccc;//取消颜色
+
+$border_color:#e7e7e7;
+$titleBg_color:#eee;//标题的背景色；
+// $tableTitle_bg_color:
+$seperaBg_color:#f5f5f5;//熊猫色，间隔色背景
+$paper_border:#dcdcdc;
+$lightGray-color:#a0a0a0;
+
+$text_color:#222;//标题的文本色（包括导航和位置信息）
+$gray_color:#444;//文本色
+$lightGray_color:#737373;//淡灰色字体
+// 基本字体的配置
+$baseFontFamily: "Microsoft Yahei" !default;
+$baseNumFamily: Arial;//数字的字体;
+$baseFontSize : 14px !default;
+$baseLineHeight: 1 !default;
+$serif: $baseFontFamily !default;
+$sans-serif: "Microsoft Yahei";
+$border-color:#dcdcdc;
+$border:$border-color solid 1px;
+
+// 正确错误提示 等操作的颜色
+$error_color:#ce3e3e;
+$alert_color:#ee8748;
+$jige_color:#f88a47;//及格色
+
+
+

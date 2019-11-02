@@ -1,0 +1,65 @@
+@charset "UTF-8";
+.sd_page_error{
+
+  padding:80px;
+  @extend %textAlign;
+  @extend %fontSize20;
+  .weui-msg__icon-area{
+    @extend %ovh;
+    padding:0 100px;
+  }
+  .introduce_404{
+    //@extend %float;
+    margin-bottom:200px;
+    padding-top:60px;
+    @extend %textAlign;
+    .msg_404{
+      color:#FF8F80;
+      font-size:60px;
+      margin-bottom:20px;
+    }
+  }
+  .img_404{
+    @extend %textAlign;
+    //@extend %float;
+    //width:373px;
+    //height:404px;
+  }
+  .weui-msg__opr-area{
+    @extend %textAlign;
+    margin-top:50px;
+    .weui-btn-area{
+      a{
+        color:$base_color;
+        @extend %fontSize20;
+        &.sd_wrong_page_home{
+          &:before{
+            content:'\e70d';
+            color:$base_color;
+          }
+        }
+        &.sd_wrong_page_back{
+          &:before{
+            content:'\e697';
+            color:$base_color;
+          }
+        }
+      }
+      a+a{
+        margin-left:40px;
+
+      }
+    }
+  }
+  h2{
+    margin-bottom: 20px;
+  }
+}
+
+.graph-cell-table{
+  td{
+    padding:0;
+  }
+}
+
+

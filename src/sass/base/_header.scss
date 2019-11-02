@@ -1,0 +1,71 @@
+@charset "UTF-8";
+//顶部header
+.header-box{
+	@extend %relative;
+	 background: url("./assets/headerbg.png") no-repeat top center;
+	 height:102px;
+   background-size: 100% 100%;
+   text-align: center;
+   .item-txt{
+   	padding-top:30px;
+      font-size: 25px;
+      line-height: 38px;
+      color:#fff;
+   }
+}
+.item-txt-time{
+   @extend %absolute;
+   right:74px;
+   top:12px;
+   font-size:18px;
+   color:#61d2f7;
+}
+
+.header-info-top{
+   @include height(true, 64px, 64px);
+   @extend %relative;
+   background:url('./assets/headInfoBg.png') no-repeat 0 bottom;
+   // background:url('./assets/headertop2.png') no-repeat 0 bottom;
+   @extend %ovh;
+   &:after{
+      content:' ';
+      display: block;
+      width:100%;
+      @extend %absolute;
+      left:505px;
+      top:41px;
+      z-index:1;
+      background:#1a6fa6;
+      @include height(true, 1px, 1px);
+   }
+   &.header-list-top{
+      p.txt{
+         color:#ffffff;
+      }
+      .go-on-seeMore{
+         display:none;
+      }
+   }
+   p.txt{
+      @extend %relative;
+      padding-left:54px;
+      font-size:26px;
+      font-familya:'HeiTi';
+      color:#fff;
+   }
+  .item-txt-time{
+   top:-8px;
+  }
+}
+
+.top-button-all{
+   display: inline-block;
+   text-align: right;
+   @extend %absolute;
+   right:90px;
+   top:7px;
+   line-height: 20px;
+   a{
+      margin-right:12px;
+   }
+}

@@ -1,0 +1,209 @@
+@charset "UTF-8";
+html, body {
+  font-size: 14px;
+  font-style: normal;
+  height: 100%;
+  line-height: 100%;
+  font-family: "Microsoft Yahei";
+
+}
+
+body {
+  width:100%;
+  height: 100%;
+  //width: calc(100vw - 17px);
+  overflow-x: auto;
+}
+
+html, body {
+  background: #f2f2f2;
+  span {
+    &:focus, &:hover, &:active {
+      outline: 0;
+    }
+  }
+  #app {
+    height: 100%;
+  }
+}
+
+
+//删除Input
+input::-ms-clear {
+  display: none;
+}
+
+html, body, input, button {
+  resize: none;
+  outline: none;
+  font-family: $baseFontFamily;
+  color: #444;
+}
+
+textarea {
+  outline: none;
+}
+
+input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
+  background: #fff;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+}
+
+p + p, ul + p, ol + p {
+  margin-top: 0;
+}
+
+button {
+  padding: 0;
+}
+
+a {
+  color: $text_color;
+  cursor: pointer;
+  &:link, &:visited, &:hover, &:focus {
+    color: $text_color;
+    text-decoration: none;
+    transition: all 0.05s linear 0s;
+  }
+  &:focus {
+    outline: none;
+  }
+
+}
+.sd_disable {
+  background-color: #c7c7c7;
+  cursor: not-allowed;
+}
+table {
+  border-collapse: collapse;
+}
+
+i, span, a {
+  *display: inline;
+  letter-spacing: normal;
+  word-spacing: normal;
+}
+
+i, em, cite {
+  font-style: normal;
+}
+
+h1, h2, h3, h4, h4, h6 {
+  font-weight: normal;
+  font-style: normal;
+  line-height: 100%;
+}
+
+@font-face {
+  font-family: 'iconfont';  /* project id 882741 */
+  src: url('//at.alicdn.com/t/font_882741_um489xutjsi.eot');
+  src: url('//at.alicdn.com/t/font_882741_um489xutjsi.eot?#iefix') format('embedded-opentype'),
+  url('//at.alicdn.com/t/font_882741_um489xutjsi.woff') format('woff'),
+  url('//at.alicdn.com/t/font_882741_um489xutjsi.ttf') format('truetype'),
+  url('//at.alicdn.com/t/font_882741_um489xutjsi.svg#iconfont') format('svg');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 14px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  // -webkit-text-stroke-width: 0.2px;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.clearfix {
+  display: block;
+  min-height: 1%;
+}
+
+.clearfix:after {
+  content: ".";
+  display: block;
+  clear: both;
+  height: 0;
+  visibility: hidden;
+}
+
+.fyahei {
+  font-family: $baseFontFamily;
+}
+
+.vam {
+  @extend %vam;
+}
+
+.icon {
+  @extend %display;
+  @extend %vam;
+}
+
+.mb44 {
+  margin-bottom: 44px;
+}
+.mt14{
+  margin-top:14px;
+}
+.mb20{
+  margin-bottom:20px;
+}
+.ovh {
+  @extend %ovh;
+}
+.fwb{
+  @extend %fwb;
+}
+.minheight {
+  @extend %minHeight;
+}
+.p_relative{
+  @extend %relative;
+}
+
+.tac{
+  @extend %textAlign;
+}
+
+.disabled_click {
+  pointer-events: none;
+  cursor: default;
+}
+
+//弹窗确定和取消按钮位置
+.el-message-box{
+  .el-message-box__btns{
+    overflow: hidden;
+    button{
+      &:nth-child(2){
+        float:right;
+      }
+      &.el-button{
+        float:right;
+        margin-left:10px;
+      }
+    }
+  }
+
+
+}
+
+
+//位置
+.ff{
+  @extend %float;
+}
+
+.el-dropdown-menu__item{
+  a:link,a:visited{
+    color:#606266;
+  }
+  a:hover{
+    color:$base_color;
+  }
+}
+
+

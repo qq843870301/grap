@@ -1,0 +1,43 @@
+@charset "UTF-8";
+.user-form-common{
+  width:80%;
+  margin:25px auto;
+  .user-form-common-input{
+  	// width:70%;
+  }
+
+}
+.user-form-common-tip{
+  color:$base_color;
+  padding-left:27px;
+  cursor:pointer;
+}
+.user-form-common-text{
+	&:hover{
+		.user-form-common-content{
+		  border-color:$base_color;
+		}
+
+	}
+	.text{
+		width:25%;
+		@extend %display;
+		// @extend %textAlign;
+	}
+	.user-form-common-tip{
+		padding-left:5px;
+	}
+	.el-select{
+		width:30%;
+		margin-right:10px;
+		&:last-child{
+			margin-right:0;
+		}
+	}
+}
+.user-form-common-content{
+	padding:4px 0 4px 4px;
+	@extend %display;
+	width:80%;
+	border:1px solid #fff;
+}

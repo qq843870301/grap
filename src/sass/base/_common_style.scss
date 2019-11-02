@@ -1,0 +1,224 @@
+@charset "UTF-8";
+// 内容部分宽度1400的设置
+.user_container {
+  @extend %minWidth;
+}
+
+.user_content {
+  @extend %containerWidth;
+  @extend %relative;
+  @extend %ovh;
+  min-height: calc(100vh - 166px);
+  padding: 30px 0;
+}
+
+//白色背景
+.white_bg {
+  background-color: #fff;
+}
+
+//表格样式
+.user_table {
+  &.el-table {
+    thead {
+      tr {
+        background-color: $base_color;
+        .custom_table_head {
+          background-color: #eef1f6;
+        }
+      }
+    }
+    th {
+      color: #000;
+    }
+    th, td, tr {
+      @extend %textAlign;
+      @extend %fontSize14;
+    }
+  }
+}
+
+//分页
+.sd_pages {
+  padding: 34px 0;
+  text-align: right;
+}
+
+//暂无数据的样式
+.sd_nonData {
+  @extend %textAlign;
+  @include height(true, 70px, 70px);
+  margin: 0 auto;
+  &.iconfont {
+    @extend %fontSize14;
+    color: #8c8c8c
+  }
+  &:before {
+    content: '\e68b';
+    //color: $jige_color;
+    font-size: 36px;
+    margin-right: 10px;
+    @extend %vam;
+  }
+}
+
+//select 箭头样式覆盖
+.user_custom_select {
+  .el-input__inner {
+    padding-right: 40px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+  }
+  .el-input__suffix {
+    @extend %display;
+    right: 0;
+    width: 40px;
+    background-color: $base_color;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    .el-input__icon {
+      line-height: 32px;
+    }
+  }
+  .el-select {
+    .el-input {
+      .el-select__caret {
+        color: #fff;
+      }
+    }
+  }
+}
+
+//弹窗背景色
+.um_dialog_center {
+  .el-dialog__header {
+    padding: 0 20px;
+    @include height(ture, 50px, 50px);
+    // @extend %textAlign;
+    background-color: #efefef;
+    .el-dialog__headerbtn {
+      background-color: transparent;
+      top: 0;
+    }
+  }
+  .sd_excel_input_Tname{
+    @extend %textAlign;
+  }
+  .upload-demo{
+    @extend %textAlign;
+  }
+  .sd_down_excel{
+    display:block;
+    margin-top:14px;
+    cursor: pointer;
+    text-decoration: underline;
+    color: $base_color;
+    &:hover{
+      color:$base_color;
+    }
+  }
+}
+
+.user-common-el-dialog {
+  border-radius: 5px;
+  overflow: hidden;
+  .el-form-item {
+    margin-bottom: 18px;
+  }
+  .el-form-item__label {
+    padding: 4px 12px 4px 0;
+  }
+  .user-dialog-footer {
+    display: block;
+    text-align: center;
+    button {
+      padding: 10px 20px;
+    }
+  }
+}
+
+.el-popover {
+  min-width: 100px !important;
+  padding: 0 !important;
+  .popper__arrow {
+    display: none;
+  }
+}
+
+.user-eidtor-button {
+  @extend %textAlign;
+  a {
+    display: block;
+    @include height(true, 40px, 40px);
+    &:hover {
+      background: $base_color;
+      color: #fff;
+    }
+    // font-size:16px;
+  }
+}
+
+.el-button {
+  &.el-button--medium {
+    margin: 0 14px !important;
+  }
+  &.user-form-add-teaching {
+    padding: 10px 20px;
+  }
+  // &.user-button-dialog-reset{
+  //       margin-right:30px;
+  //       background:#a2a6a5;
+  //       color:#fff;
+  // }
+}
+
+.el-steps {
+  &.user-form-steps {
+    .el-step__title {
+      &.is-process, &.is-success {
+        font-weight:inherit;
+        color: $base_color;
+      }
+      &.is-wait {
+        color: #969696;
+      }
+    }
+    .el-step__head {
+
+      &.is-wait {
+        color: #969696;
+        .is-text {
+          border-color: #969696;
+        }
+      }
+      &.is-process, &.is-success {
+        color: $base_color;
+        .is-text {
+          width:30px;
+          height:30px;
+          border-color: $base_color;
+          border-width:1px;
+          background:$base_color;
+          .el-step__icon-inner{
+            color:#fff;
+            font-weight:inherit;
+          }
+        }
+
+      }
+
+    }
+  }
+}
+
+//分页样式
+.page_style{
+  float: right;
+  margin-top: 25px;
+}
+
+
+
+
+

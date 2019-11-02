@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>图表展示</title>
+	<link rel="stylesheet" type="text/css" href="styles/grapheditor.css" />
+	<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.ico">
+	<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.ico">
+	<link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#d89000">
+    <link rel="stylesheet" type="text/css" href="styles/grapheditor.css">
+    <!-- <link rel="canonical" href="https://www.draw.io"> -->
+	<link rel="manifest" href="images/manifest.json">
+	<link rel="shortcut icon" href="favicon-16x16.ico">
+	<script src="js/app.min.js"></script>
+	<!-- Sets the basepath for the library if not in same directory -->
+	<!-- <script type="text/javascript">
+		mxBasePath = './mxgraph';
+	</script> -->
+
+	<!-- Loads and initializes the library -->
+	<!-- <script type="text/javascript" src="./mxgraph/js/mxClient.min.js"></script> -->
+	<script type="text/javascript">
+
+		function main(container)
+		{
+			function b64DecodeUnicode(str) {
+			  return decodeURIComponent(atob(str).split('').map(function (c) {
+			    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+			  }).join(''))
+			}
+
+			function getStorageDataAndDecode(key, value) {
+			  let json = localStorage.getItem(key)
+				  
+				  if (json != null) {
+				    try {
+				      let jsonDecode = b64DecodeUnicode(json)
+				      return JSON.parse(jsonDecode)
+				    } catch (e) {
+				    }
+				  }
+				  return null
+			}
+			if (mxClient.isBrowserSupported()){
+				  // var objectDatas = enent.data
+				  var objectDatas = getStorageDataAndDecode('xmlDatas')//enent.data
+				  var xmlDatas = objectDatas.xml
+				  console.log(xmlDatas, 'xmlDatas')
+				  var xmlDocument = mxUtils.parseXml(xmlDatas);
+				  if (xmlDocument != null){
+				  	
+						var decoder = new mxCodec(xmlDocument);
+					  var node = xmlDocument.documentElement;
+					  var graph = new mxGraph(container);
+						
+						graph.setHtmlLabels(true);//Label 将显示 Html 格式的 Value
+						graph.htmlLabels  = true;
+						graph.fit();//自适应
+						graph.center(true, true, 0.5,0.5);
+						graph.centerZoom = false;
+						graph.setTooltips(false); //激活工具显示条
+						graph.setEnabled(false); //禁用基本选择和单元格处理 交互 工作
+						graph.setPanning(false); //激活平移
+						
+						graph.graphHandler.scaleGrid = false;
+						graph.panningHandler.useLeftButtonForPanning = true;
+						graph.panningHandler.ignoreCell = false;
+						// graph.container.style.cursor = 'move';
+						graph.gridSize = 0;
+						graph.gridEnabled = false; //是否启用网格
+						graph.resizeContainer = false;
+						graph.autoScroll = true; //自动滚屏
+
+						// Enables wrapping for vertex labels
+						graph.isWrapping = function(cell)
+						{
+							return this.model.isCollapsed(cell);
+						};
+						// Enables clipping of vertex labels if no offset is defined
+						graph.isLabelClipped = function(cell)
+						{
+							var geometry = this.model.getGeometry(cell);
+							
+							return geometry != null && !geometry.relative && (geometry.offset == null ||
+								(geometry.offset.x == 0 && geometry.offset.y == 0));
+						};
+						//l自定义属性 显示设置变更 
+						graph.getLabel = function(cell)
+						{
+							var labelValue = (this.labelsVisible) ? this.convertValueToString(cell) : '';
+						  var label = mxGraph.prototype.getLabel.apply(this, arguments);
+						  var geometry = this.model.getGeometry(cell);
+						  var labelHTML= ''
+						  if (label != null && this.model.isVertex(cell) && geometry.width >= 2 && !this.model.isCollapsed(cell) && geometry != null && (geometry.offset == null ||	(geometry.offset.x == 0 && geometry.offset.y == 0)) )
+						  {
+						  	if(label == 'object'){
+						  		var labelVal =  this.model.getValue(cell).getAttribute('label')
+						  		labelHTML = labelVal.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&quot;/g, '"').replace(/\n/g, '').replace(/&amp;/g, '&').replace(/&#10;/g, '</br>')
+						  		// console.log(labelHTML, 'labelHtml')
+						  	}else{
+						  		labelHTML = label.replace(/&gt;/g, '>').
+		    				replace(/&lt;/g, '<').replace(/&quot;/g, '"').replace(/\n/g, '').replace(/&amp;/g, '&').replace(/&#10;/g, '</br>');
+						  	}
+						  }
+						  
+						  return labelHTML // mxUtils.htmlEntities();
+						}
+
+						var style = new Object();
+						style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_CONNECTOR;
+						style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+						// style[mxConstants.STYLE_IMAGE] = 'editors/images/bigicon/start_event_empty.png';
+						// style[mxConstants.STYLE_IMAGE_WIDTH] = '48';
+						// style[mxConstants.STYLE_IMAGE_HEIGHT] = '48';
+						// style[mxConstants.STYLE_FONTCOLOR] = '#000000';
+						style[mxConstants.STYLE_VERTICAL_LABEL_POSITION] = mxConstants.ALIGN_CENTER;
+						graph.getStylesheet().putCellStyle('start-s', style);
+
+						
+						// Changes the default style for edges "in-place"
+						// var vertexStyle = graph.getStylesheet().getDefaultVertexStyle();
+						// vertexStyle[mxConstants.ROUNDED] = true;
+						// var edgeStyle = graph.getStylesheet().getDefaultEdgeStyle();
+						// edgeStyle[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
+
+						var style = graph.getStylesheet().getDefaultVertexStyle();
+						style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+				    style[mxConstants.DIALECT_STRICTHTML] = mxPerimeter.strictHtml;
+				    style[mxConstants.ALIGN_CENTER] = 'center';
+				    style[mxConstants.ALIGN_MIDDLE] = 'middle';
+				    
+				    decoder.decode(node, graph.getModel()); //一定要放在 graph style 设置的后面
+						
+						// Enables panning with left mouse button
+						
+						// function createdDivs(Datas, left, top){
+						//    if(!Datas) { return}
+						//    var hasDiv = document.getElementById('showCellInfo')
+						//    if(hasDiv){container.removeChild(hasDiv)}
+			   //       var divBox = document.createElement('div');
+			   //       var pageHeight = document.body.clientHeight
+			   //       var pageWidth = document.body.clientWidth
+			   //       // console.log(pageWidth, pageHeight, 'pageHeight')
+			   //       divBox.setAttribute('id', 'showCellInfo');
+	     //         divBox.style.position = 'absolute';
+	     //         divBox.style.padding = '15px';
+	     //         divBox.style.color = '#000000';
+	     //         divBox.style.minWidth = '20%';
+	     //         divBox.style.borderRadius = '5px';
+
+	     //         //弹层x， y 溢出的情况
+	     //         if(pageWidth - left < 300 && pageHeight - top < 300){
+	     //         	divBox.style.right = (pageWidth - left) + 'px'; // + cell.geometry.width
+	     //         	divBox.style.bottom = (pageHeight - top) + 'px';
+	     //         }else if (pageWidth - left < 300 && pageHeight - top > 300){
+	     //         	divBox.style.right = (pageWidth - left) + 'px'; // + cell.geometry.width
+	     //         	divBox.style.top = top + 'px';
+	     //         }else if (pageWidth - left > 300 && pageHeight - top > 300){
+	     //         	divBox.style.left = left + 'px'; // + cell.geometry.width
+	     //         	divBox.style.top = top + 'px';
+	     //         }else if (pageWidth - left > 300 && pageHeight - top < 300){
+	     //         	divBox.style.left = left + 'px'; // + cell.geometry.width
+	     //         	divBox.style.bottom = (pageHeight - top) + 'px';
+	     //         }
+
+
+	     //         // divBox.style.border = 'solid 1px #fff'
+	     //         // divBox.style.backgroundColor = '#ffffff';
+	     //         var btn = document.createElement('a')
+	     //         btn.className = 'closeBtn'
+	     //         mxEvent.addListener(btn,'click', function(evt){
+	     //         	 var curentBoxLayer = evt.target.parentNode 
+	     //         	 container.removeChild(curentBoxLayer)
+	     //         })
+	     //         divBox.appendChild(btn)
+
+	     //         var bgDiv = document.createElement('div');
+	     //         bgDiv.style.position = 'absolute';
+	     //         bgDiv.style.top = '0';
+	     //         bgDiv.style.left = '0';
+	     //         bgDiv.style.width = '100%';
+	     //         bgDiv.style.height = '100%';//bgDiv.parentNode.height();
+	     //         bgDiv.style.backgroundColor = '#000000';
+	     //         divBox.style.border = 'solid 1px #fff'
+	     //         bgDiv.style.opacity = 70/100;
+	     //         bgDiv.style.zIndex = 1;
+	     //         bgDiv.style.boxShadow = '2px 3px 6px -1px #dddddd';
+	     //         bgDiv.style.borderRadius = '5px';
+	     //         divBox.appendChild(bgDiv)
+	     //         var ulBox = document.createElement('ul');
+	     //         ulBox.className = 'nodeUlStyle';
+	     //         ulBox.style.position = 'relative';
+	     //         ulBox.style.zIndex = 2;
+	     //         delete Datas['@label']
+		    //        delete Datas['mxCell']
+	     //         for(var data in Datas){
+	     //         	// console.log(data != '@id', '@id')
+	     //         	if(data != '@id'){
+		    //          	 var varrent_info = Datas[data].toString().replace(/&amp;/g, '&').replace(/&#10;/g, '</br>');
+		    //          	 console.log(varrent_info, 'varrent_info')
+		    //            var current_attr = varrent_info.split('&')
+		    //            console.log(current_attr, 'current_attr')
+		    //            console.log(varrent_info, 'varrent_info')
+		    //            var liBox = document.createElement('li');  
+		    //            var span_key = document.createElement('span');
+		    //            var span_val = document.createElement('span');
+		    //            span_key.className = 'spanName';
+		    //            span_key.innerHTML = data.substring(1) + ':'; //从第二个字符开始
+		    //            span_val.className = 'spanKey';
+		    //            span_val.innerHTML = current_attr[0];
+		    //            liBox.appendChild(span_key)
+		    //            liBox.appendChild(span_val)
+		    //            ulBox.appendChild(liBox)
+		    //            //属性参数变量截取
+		    //            if(current_attr[1]){
+		    //             var attactBtn = document.createElement('button')
+		    //             mxUtils.write(attactBtn, "攻击")
+		    //             attactBtn.className = "attactButStyle"
+		    //             attactBtn.setAttribute('dataKey', current_attr[1])	                
+		    //             mxEvent.addListener(attactBtn, 'click', function(evt)
+		    //             {
+		    //             	var clickCur = evt.target.getAttribute('dataKey')
+		    //             	for(attack in objectDatas.attacks){
+		    //             		console.log(clickCur, 'clickCur')
+		    //             		if(attack == clickCur){
+		    //             			objectDatas.attacks[attack] = 1
+		    //             		}else{
+		    //             			objectDatas.attacks[attack] = 0
+		    //             		}
+		    //             	}
+		    //               var newAttacks = objectDatas.attacks
+		    //               var url = 'http://soc.122.204http://soc.122.204.161.218.xip.io:9023/api/mx_graph/execution_operation'
+		    //               var params = []
+		    //               for(var newVal in newAttacks){
+		    //               	params.push(newAttacks[newVal])
+		    //               }
+		    //               var request = new XMLHttpRequest(); // 新建XMLHttpRequest对象
+						// 					request.onreadystatechange = function () { // 状态发生变化时，函数被回调
+						// 					    if (request.readyState === 4) { // 成功完成
+						// 					        // 判断响应结果:
+						// 					        if (request.status === 200) {
+						// 					            // 成功，通过responseText拿到响应的文本:
+						// 					            mxUtils.alert('发送攻击请求成功！')
+						// 					            // return request.responseText;
+						// 					        } else {
+						// 					            // 失败，根据响应码判断失败原因:
+						// 					            mxUtils.alert('发送攻击请求失败！')
+						// 					            // return request.status;
+						// 					        }
+						// 					    } else {
+						// 					        // HTTP请求还在继续...
+						// 					    }
+						// 					}
+
+						// 					// 发送请求:
+											
+						// 					request.open('POST', url);
+						// 					request.setRequestHeader('Content-Type','application/json')
+						// 					request.send(JSON.stringify(params));
+		    //               mxEvent.consume(evt);
+		    //             });
+		    //             span_val.appendChild(attactBtn)
+		    //            }
+		    //         }
+
+	     //         }
+	             
+	     //         ulBox.appendChild(liBox)
+	     //         divBox.appendChild(ulBox)
+
+	     //         container.appendChild(divBox)
+			   //    }
+						//捕获任务节点的鼠标点击事件
+					  // graph.addListener(mxEvent.CLICK, function(sender, evt) {
+					  //  var cell = evt.getProperty('cell');	
+					  //  var targetEvent = evt.getProperty('event')
+					  //  if(!cell){return}	
+					  //  var currentId = cell['id'] ? cell['id'] : ''
+					  //  if(currentId == undefined || currentId == null || currentId == ''){
+					  //  	return
+					  //  }else{
+					  //  console.log(evt, 'event')
+					  //  // var cellDatas = cell.value.attributes
+					  //  var left = targetEvent.clientX;
+					  //  var top = targetEvent.clientY; //+ cell.geometry.height
+			    //    var currentData = null
+			    //    if(!objectDatas['xml_object']){return}
+		     // 		 for(var i = 0; i < objectDatas['xml_object'].length; i++){
+			    //     if(objectDatas['xml_object'][i]['@id'] === currentId){
+			    //       currentData = objectDatas['xml_object'][i]
+			          
+			    //     }
+			    //   }
+   			 //       createdDivs(currentData, left, top)
+					  //  }
+					  // });
+						
+						
+					}
+
+			}
+			
+		};
+		
+	</script>
+
+	<style>
+	body, html{
+		height:100%;
+	}
+		.geDiagramContainer{
+			border:none;
+			height: 100%;
+		}
+		.nodeUlStyle{
+			padding:0;
+		}
+		.nodeUlStyle li{
+		  	border-bottom: solid 1px #d3cfcf;
+		  	overflow: hidden;
+		  	padding:6px 8px;
+		}
+		.nodeUlStyle li:last-child{
+			border-bottom: none;
+		}
+		.nodeUlStyle li span{
+			float:left;
+			line-height: 25px;
+			font-size:14px;
+			color:#fff;
+		}
+		.nodeUlStyle li span:first-child{
+			width:25%;
+			max-width:200px;
+		}
+		.nodeUlStyle li span:nth-child(2){
+			padding-left:5px;
+			width:71%;
+			max-width:450px;
+		}
+
+		.attactButStyle{
+			background: #f4f4f5;
+			border:none;
+			padding:5px 10px;
+			/*height: 20px;*/
+			line-height: 1;
+			border-radius: 3px;
+			margin:0 0 0 10px;
+		}
+		.closeBtn{
+			display: inline-block;
+			position: absolute;
+			right:8px;
+			top:8px;
+			width:12px;
+			height: 12px;
+			background: url('images/close.png') no-repeat center center;
+			z-index:6;
+		}
+	</style>
+</head>
+<!-- Page passes the container for the graph to the program -->
+<!--  -->
+<body onload="main(document.getElementById('graphContainer'))" class="geEditor">
+	<!-- Creates a container for the graph with a grid wallpaper -->
+	<div id="graphContainer" style="overflow:hidden;width:100%;background:none;cursor:default;">
+	</div>
+</body>
+</html>

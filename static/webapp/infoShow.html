@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>图表展示</title>
+	<link rel="stylesheet" type="text/css" href="styles/grapheditor.css" />
+	<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.ico">
+	<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.ico">
+	<link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#d89000">
+    <link rel="stylesheet" type="text/css" href="styles/grapheditor.css">
+    <!-- <link rel="canonical" href="https://www.draw.io"> -->
+	<link rel="manifest" href="images/manifest.json">
+	<link rel="shortcut icon" href="favicon-16x16.ico">
+	<script src="js/app.min.js"></script>
+	<!-- Sets the basepath for the library if not in same directory -->
+	<!-- <script type="text/javascript">
+		mxBasePath = './mxgraph';
+	</script> -->
+
+	<!-- Loads and initializes the library -->
+	<!-- <script type="text/javascript" src="./mxgraph/js/mxClient.min.js"></script> -->
+	<script type="text/javascript">
+		var BASE_API_DATA = 'http://soc.122.204.161.218.xip.io:9023/api'
+		function main(container)
+		{
+			if (mxClient.isBrowserSupported()){
+				window.addEventListener('message',function(event){		
+				  var objectDatas = event.data
+				  var xmlData_Id = objectDatas.id
+				  var xmlData = objectDatas.xml
+					var xmlDocument = mxUtils.parseXml(xmlData);
+					var userName = objectDatas.creator
+					var tyoeModel = objectDatas.addType
+					var fromData = objectDatas.onFrom
+					var hasChangePerm = objectDatas.has_change_perm
+					if (xmlDocument != null){
+						// mxUtils.DrawioFile(xmlDocument)
+						var decoder = new mxCodec(xmlDocument);
+					  var node = xmlDocument.documentElement;
+
+						var graph = new mxGraph(container);
+						graph.setHtmlLabels(true);//Label 将显示 Html 格式的 Value
+						graph.htmlLabels  = true;
+						graph.fit();//自适应
+						graph.center(true, true, 0.5,0.5);
+						graph.centerZoom = false;
+						graph.setTooltips(false); //激活工具显示条
+						graph.setEnabled(false); //禁用基本选择和单元格处理 交互 工作
+						graph.setPanning(false); //激活平移
+						
+						graph.graphHandler.scaleGrid = false;
+						graph.panningHandler.useLeftButtonForPanning = true;
+						graph.panningHandler.ignoreCell = false;
+						// graph.container.style.cursor = 'move';
+						graph.gridSize = 0;
+						graph.gridEnabled = false; //是否启用网格
+						graph.resizeContainer = false;
+						graph.autoScroll = true; //自动滚屏
+
+						
+						// Enables wrapping for vertex labels
+						graph.isWrapping = function(cell)
+						{
+							return this.model.isCollapsed(cell);
+						};
+						// Enables clipping of vertex labels if no offset is defined
+						// 如果未定义偏移，则启用顶点标签的剪裁
+						// graph.isLabelClipped = function(cell)
+						// {
+						// 	var geometry = this.model.getGeometry(cell);
+							
+						// 	return geometry != null && !geometry.relative && (geometry.offset == null ||
+						// 		(geometry.offset.x == 0 && geometry.offset.y == 0));
+						// };
+						//l自定义属性 显示设置变更 
+						graph.getLabel = function(cell)
+						{
+							var labelValue = (this.labelsVisible) ? this.convertValueToString(cell) : '';
+						  var label = mxGraph.prototype.getLabel.apply(this, arguments);
+						  var geometry = this.model.getGeometry(cell);
+						  var labelHTML= ''
+						  if (label != null && this.model.isVertex(cell) && geometry.width >= 2 && !this.model.isCollapsed(cell) && geometry != null && (geometry.offset == null ||	(geometry.offset.x == 0 && geometry.offset.y == 0)) )
+						  {
+						  	if(label == 'object'){
+						  		var labelVal =  this.model.getValue(cell).getAttribute('label')
+						  		labelHTML = labelVal.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&quot;/g, '"').replace(/\n/g, '').replace(/&amp;/g, '&').replace(/&#10;/g, '</br>')
+						  		// console.log(labelHTML, 'labelHtml')
+						  	}else{
+						  		labelHTML = label.replace(/&gt;/g, '>').
+		    				replace(/&lt;/g, '<').replace(/&quot;/g, '"').replace(/\n/g, '').replace(/&amp;/g, '&').replace(/&#10;/g, '</br>');
+						  	}
+						  }
+						  
+						  return labelHTML // mxUtils.htmlEntities();
+						}
+            
+
+						// 设置拖拽边的过程出现折线，默认为直线
+						// graph.connectionHandler.createEdgeState = function () {
+						//   const edge = this.createEdge();
+						//   return new mxCellState(graph.view, edge, graph.getCellStyle(edge));
+						// };
+
+						var style = new Object();
+						style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_CONNECTOR;
+						style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+						// style[mxConstants.STYLE_IMAGE] = 'editors/images/bigicon/start_event_empty.png';
+						// style[mxConstants.STYLE_IMAGE_WIDTH] = '48';
+						// style[mxConstants.STYLE_IMAGE_HEIGHT] = '48';
+						// style[mxConstants.STYLE_FONTCOLOR] = '#000000';
+						style[mxConstants.STYLE_VERTICAL_LABEL_POSITION] = mxConstants.ALIGN_CENTER;
+						graph.getStylesheet().putCellStyle('start-s', style);
+						
+						
+						// Changes the default style for edges "in-place"
+						var style = graph.getStylesheet().getDefaultEdgeStyle();
+						// style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+				    style[mxConstants.DIALECT_STRICTHTML] = mxPerimeter.strictHtml;
+				    style[mxConstants.STYLE_EDGE] = mxConstants.EDGESTYLE_ORTHOGONAL// 设置折线
+				    style[mxConstants.ALIGN_CENTER] = 'center';
+				    style[mxConstants.ALIGN_MIDDLE] = 'middle';
+						
+						// Enables panning with left mouse button
+						
+						//捕获任务节点的鼠标点击事件
+					  graph.addListener(mxEvent.CLICK, function(sender, evt) {
+					   var cell = evt.getProperty('cell');	
+					   var targetEvent = evt.getProperty('event')
+					   console.log(cell, 'cell')
+					   if(!cell){return}	
+					   var currentId = cell['id'] ? cell['id'] : ''
+					   if(currentId == undefined || currentId == null || currentId == '' || cell['source'] != null){
+					   	return
+					   }else{
+					   	if(typeof cell.value  === 'object'){
+					   		var get_val = cell.value['attributes'][0]['value'];
+					   		var cell_name = filterHTMLTag(get_val ? get_val : '');
+					   	}else{
+					   	  var cell_name = filterHTMLTag(cell.value ? cell.value : '');	
+					   	}
+					   	
+						   // console.log(evt, 'event')
+						   // var cellDatas = cell.value.attributes
+						   var left = targetEvent.clientX;
+						   var top = targetEvent.clientY; //+ cell.geometry.height
+				       var currentData = null
+
+				       if(objectDatas['xml_object']){
+				     		 for(var i = 0; i < objectDatas['xml_object'].length; i++){
+						        if(objectDatas['xml_object'][i]['@id'] === currentId){
+						          currentData = objectDatas['xml_object'][i]
+						        }
+						     }
+					     }
+					     if(currentData == null){
+					     	currentData = {'@id': currentId, '@label': cell_name}
+					     }
+				     	 createPopupMenu(currentData, xmlData_Id, currentId, objectDatas['onFrom'], container, left, top);
+					   }
+					  });
+						decoder.decode(node, graph.getModel());
+						
+						// console.log(event.data, 'infow')
+						//Adds zoom buttons in top, left corner
+						var buttons = document.createElement('div');
+						buttons.style.position = 'absolute';
+						buttons.style.overflow = 'visible';
+
+						var bs = graph.getBorderSizes();
+						buttons.style.top = '0';//(container.offsetTop + bs.y) + 'px';
+						buttons.style.left = '50%';//(container.offsetLeft + bs.x) + 'px';
+						buttons.style.marginLeft = '-57px';
+						
+						var left = 0;
+						var bw = 40;
+						var bh = 20;
+						
+						if (mxClient.IS_QUIRKS)
+						{
+							bw -= 1;
+							bh -= 1;
+						}
+					}
+
+
+					// 单击事件 发请求
+					// Function to create the entries in the popupmenu
+					function createPopupMenu(label_data, current_xml_id, current_cell_id,from,container, left, top){
+						var url = BASE_API_DATA + '/mx/get_subgraph_info?graph_id=' + current_xml_id + '&attribute_id=' + current_cell_id;
+						ajaxGet(url,function(data){
+							// console.log(data.toString() == '查询的图表属性下没有子图' && label_data['mxCell'] == undefined && (from != 'manager' || hasChangePerm == 'False'), 'ddd')
+							if(data.toString() == '查询的图表属性下没有子图' && label_data['mxCell'] == undefined && (from != 'manager' || hasChangePerm == 'False')){
+								return
+							}else{
+							  createdDivs(label_data, current_xml_id, data, left, top, from, container);	
+							}
+							
+						})
+					};
+					function createdDivs(Datas, current_xml_id, child_data, left, top, from, container){
+						var hasDiv = document.getElementById('showCellInfo')
+						if(hasDiv){container.removeChild(hasDiv)}
+						var divBox = document.createElement('div');
+						var pageHeight = document.body.clientHeight
+						var pageWidth = document.body.clientWidth
+						// console.log(pageWidth, pageHeight, 'pageHeight')
+						divBox.setAttribute('id', 'showCellInfo');
+						divBox.style.position = 'absolute';
+						divBox.style.padding = '15px';
+						divBox.style.color = '#000000';
+						divBox.style.minWidth = '20%';
+						divBox.style.borderRadius = '5px';
+
+						//弹层x， y 溢出的情况
+						if(pageWidth - left < 300 && pageHeight - top < 300){
+							divBox.style.right = (pageWidth - left) + 'px'; // + cell.geometry.width
+							divBox.style.bottom = (pageHeight - top) + 'px';
+						}else if (pageWidth - left < 300 && pageHeight - top > 300){
+							divBox.style.right = (pageWidth - left) + 'px'; // + cell.geometry.width
+							divBox.style.top = top + 'px';
+						}else if (pageWidth - left > 300 && pageHeight - top > 300){
+							divBox.style.left = left + 'px'; // + cell.geometry.width
+							divBox.style.top = top + 'px';
+						}else if (pageWidth - left > 300 && pageHeight - top < 300){
+							divBox.style.left = left + 'px'; // + cell.geometry.width
+							divBox.style.bottom = (pageHeight - top) + 'px';
+						}
+
+
+						// divBox.style.border = 'solid 1px #fff'
+						// divBox.style.backgroundColor = '#ffffff';
+						var btn = document.createElement('a')
+						btn.className = 'closeBtn'
+						mxEvent.addListener(btn,'click', function(evt){
+							 var curentBoxLayer = evt.target.parentNode 
+							 container.removeChild(curentBoxLayer)
+						})
+						divBox.appendChild(btn)
+
+						var bgDiv = document.createElement('div');
+						bgDiv.style.position = 'absolute';
+						bgDiv.style.top = '0';
+						bgDiv.style.left = '0';
+						bgDiv.style.width = '100%';
+						bgDiv.style.height = '100%';//bgDiv.parentNode.height();
+						bgDiv.style.backgroundColor = '#000000';
+						divBox.style.border = 'solid 1px #fff'
+						bgDiv.style.opacity = 70/100;
+						bgDiv.style.zIndex = 1;
+						bgDiv.style.boxShadow = '2px 3px 6px -1px #dddddd';
+						bgDiv.style.borderRadius = '5px';
+						divBox.appendChild(bgDiv)
+						var ulBox = document.createElement('ul');
+						ulBox.className = 'nodeUlStyle';
+						ulBox.style.position = 'relative';
+						ulBox.style.zIndex = 2;
+
+						let addChildGraph_li = document.createElement('li');
+						let addChildGraph_a = document.createElement('a');
+							addChildGraph_a.innerHTML = '绑定子图';
+						//添加子图  事件 begin
+							// addChildGraph_a.setAttribute('target', '_blank');
+							// addChildGraph_a.setAttribute('href', addEditorUrl);
+							mxEvent.addListener(addChildGraph_a,'click', function(evt){
+								createdChildDiv(current_xml_id, Datas, container);
+							})
+						if(tyoeModel != 'PRIMITIVE'){
+							if(child_data.toString() == '查询的图表属性下没有子图'){
+								addChildGraph_li.className = 'addChildGraph_li';
+								addChildGraph_li.appendChild(addChildGraph_a);
+							}else{
+								var span_name_node = document.createElement('span');
+								span_name_node.className = 'spanName';
+								span_name_node.innerHTML = '子图信息：';
+								addChildGraph_li.appendChild(span_name_node)
+
+								var span_node_val = document.createElement('span');
+								span_node_val.className = 'spanKey';
+								console.log(child_data.name, 'name')
+								var text_node = document.createTextNode(child_data.name)
+								span_node_val.appendChild(text_node)
+
+								var a_node_see = document.createElement('a');
+								a_node_see.innerHTML = '查看';
+								a_node_see.className='child-see-a';
+								a_node_see.setAttribute('target', '_blank');
+								a_node_see.setAttribute('href', 'http://' + window.location.host +  '/#/info/' + child_data.id + '?onFrom=' + from);
+								span_node_val.appendChild(a_node_see);
+
+								if(from == 'manager'){
+							    var a_node_relation = document.createElement('a');
+									a_node_relation.innerHTML = '解绑';
+									a_node_relation.className = 'child-see-a child-see-d';
+									span_node_val.appendChild(a_node_relation)
+									mxEvent.addListener(a_node_relation, 'click', function(evt){
+									  deleteRelation(current_xml_id, child_data.id, Datas['@id'])
+									})	
+								}
+								addChildGraph_li.appendChild(span_node_val)
+								
+							}
+						}
+					  if((child_data.toString() != '查询的图表属性下没有子图' || from == 'manager') && tyoeModel != 'PRIMITIVE' && hasChangePerm == 'True'){ //子图不为空, 管理状态下不是图元模板里
+					    ulBox.appendChild(addChildGraph_li);	
+					  }
+						
+						   
+						// 事件 end
+						
+							// delete Datas['@label']
+							delete Datas['mxCell'];
+
+							if(Datas['@modelTypeId'] != undefined || Datas['@modelTypeLaberId'] != undefined ){
+								delete Datas['@modelTypeId'];
+								delete Datas['@modelTypeLaberId'];
+							}
+							for(var data in Datas){
+								if(data != '@id' && data != '@label'){
+									// console.log(data, 'data')
+								 	 var varrent_info = Datas[data].toString().replace(/&amp;/g, '&').replace(/&#10;/g, '</br>');
+								 	 // console.log(varrent_info, 'varrent_info')
+								   var current_attr = varrent_info.split('&');
+								   // console.log(current_attr, 'current_attr')
+								   // console.log(varrent_info, 'varrent_info')
+								   var liBox = document.createElement('li');  
+								   var span_key = document.createElement('span');
+								   var span_val = document.createElement('span');
+								   span_key.className = 'spanName';
+								   span_val.className = 'spanKey';
+								   span_key.innerHTML = data.substring(1) + ':'; //从第二个字符开始
+								   span_val.innerHTML = current_attr[0];	
+
+								   liBox.appendChild(span_key);
+								   liBox.appendChild(span_val);
+								   ulBox.appendChild(liBox);
+								   //属性参数变量截取 攻击事件
+								   if(current_attr[1]){
+								    var attactBtn = document.createElement('button');
+								    mxUtils.write(attactBtn, "攻击");
+								    attactBtn.className = "attactButStyle";
+								    attactBtn.setAttribute('dataKey', current_attr[1]);
+								    mxEvent.addListener(attactBtn, 'click', function(evt)
+								    {
+								    	var clickCur = evt.target.getAttribute('dataKey');
+								    	for(attack in objectDatas.attacks){
+								    		console.log(clickCur, 'clickCur')
+								    		if(attack == clickCur){
+								    			objectDatas.attacks[attack] = 1;
+								    		}else{
+								    			objectDatas.attacks[attack] = 0;
+								    		}
+								    	}
+								      var newAttacks = objectDatas.attacks;
+								      var url = BASE_API_DATA + '/mx_graph/execution_operation';
+								      var params = [];
+								      for(var newVal in newAttacks){
+								      	params.push(newAttacks[newVal]);
+								      }
+								      ajaxPost(url, params, function(data){
+								      	if(data.detail != undefined){
+								      		mxUtils.alert(data.detail[0]);
+									    	}else{
+									    		mxUtils.alert('发送攻击请求成功！');
+									    	}
+								      	 
+								      })
+								      
+								      mxEvent.consume(evt);
+								    });
+								    span_val.appendChild(attactBtn)
+								   }
+								}
+							}
+						  divBox.appendChild(ulBox);
+							container.appendChild(divBox);	
+					}
+					/**
+					 * [filterHTMLTag 字符过滤html标签]
+					 * @param  {[type]} msg [字符信息]
+					 * @return {[type]}     [description]
+					 */
+					function filterHTMLTag (msg) {
+					        var msg = msg.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&quot;/g, '"')
+					        msg = msg.replace(/<\/?[^>]*>/g, ''); //去除HTML Tag
+					        msg = msg.replace(/[|]*\n/, '') //去除行尾空格
+					        msg = msg.replace(/&npsp;/ig, ''); //去掉npsp
+					        // console.log(msg)
+					        return msg;
+					}
+
+
+					//绑定子图图层
+					function createdChildDiv(current_xml_id, current_cell, container){
+						var mark_div = document.createElement('div');
+						mark_div.className = 'mark-bg';
+						mark_div.setAttribute('id', 'mark_bg')
+						var layout_div = document.createElement('div');
+						layout_div.className = 'layout-container';
+						var btn_close = document.createElement('a')
+						btn_close.className = 'closeBtn close-child-div'
+						mxEvent.addListener(btn_close,'click', function(evt){
+							 var curentBoxLayer = evt.target.parentNode
+							 var curentBgLayer = document.getElementById('mark_bg');
+							 container.removeChild(curentBoxLayer)
+							 container.removeChild(curentBgLayer)
+						})
+						layout_div.appendChild(btn_close)
+
+						var childDatas = null;
+						var url = BASE_API_DATA + '/mx/get_valid_subgraph?graph_id=' + current_xml_id + '&attribute_id=' + current_cell['@id'];
+						var params = {
+							graph_id: current_xml_id,
+							attribute_id:current_cell['@id']
+							// attribute_name: current_cell['@label']||
+						}
+						ajaxGet(url, function(data){
+							if(data){
+							  childDatas = data	
+							  var ul_list = document.createElement('ul');
+								ul_list.className = 'nodeUlStyle child-node-ul';
+								ul_list.setAttribute('id', 'childList-ul');
+								var li_first = document.createElement('li');
+								
+								var addEditorUrl = 'http://' + window.location.host +  '/static/webapp/index.html?currentId=' + current_xml_id + '&cellId=' + current_cell['@id'] + '&un='+ userName + '&addType=' + tyoeModel + '&onFrom=' + fromData;
+								var addChildGraph_node = document.createElement('a');
+								addChildGraph_node.className = 'child-see-a';
+								addChildGraph_node.innerHTML = '添加';
+								addChildGraph_node.setAttribute('href', addEditorUrl);
+								addChildGraph_node.setAttribute('target', '_blank');
+								li_first.appendChild(addChildGraph_node);
+								ul_list.appendChild(li_first);
+								if(childDatas != null){
+								  for(var child in childDatas){
+
+								  	var li_data = document.createElement('li');
+								  	var span_name = document.createElement('span');
+								  	var name_text = document.createTextNode(childDatas[child].name);
+								  	span_name.appendChild(name_text)
+								  	li_data.appendChild(span_name)
+								  	var bangding_dom = document.createElement('a');
+								  	var bangding_text = document.createTextNode('绑定');
+								  	bangding_dom.className = 'child-see-a child-right';
+								  	bangding_dom.setAttribute('data-id', childDatas[child].id)
+								  	bangding_dom.appendChild(bangding_text);
+								  	li_data.appendChild(bangding_dom);
+								  	mxEvent.addListener(bangding_dom, 'click', function(evt){
+								  		var target_id = evt.target.getAttribute('data-id');
+								  		// console.log(current_cell, 'current_cell')
+								  		createdChildClick(current_xml_id, current_cell, target_id);
+								  	})
+								  	var see_url = 'http://' + window.location.host +  '/#/info/' + childDatas[child].id + '&un='+ userName + '&addType=' + tyoeModel + '?onFrom=' + fromData;
+								  	var see_a = document.createElement('a');
+								  	var see_text_node = document.createTextNode('查看');
+								  	see_a.className = 'child-see-a child-right';
+								  	see_a.setAttribute('href', see_url);
+								  	see_a.setAttribute('target', '_blank');
+								  	see_a.appendChild(see_text_node);
+								  	li_data.appendChild(see_a);
+
+								  	ul_list.appendChild(li_data);
+								  }
+								  pagination(1, 10, childDatas.length, ul_list);
+								}else{
+									var li_two = document.createElement('li');
+									li_two.className = 'li-no-data';
+									var text_node = document.createTextNode('暂无数据！')
+									li_two.appendChild(text_node) ;
+									ul_list.appendChild(li_two);
+								}
+
+								layout_div.appendChild(ul_list);
+								container.appendChild(layout_div);
+								container.appendChild(mark_div);
+
+							}
+							
+						})
+						
+					}
+					//绑定子图事件
+					function createdChildClick(current_xml_id, current_cell, child_xml_id){
+						var url = BASE_API_DATA + '/mx/bind_subgraph';
+
+						var params = {
+							graph_id: current_xml_id, 
+							attribute_id: current_cell['@id'],
+							subordinate_id: child_xml_id,
+							attribute_name: current_cell['@label']!=''?current_cell['@label']:'',
+							creator: userName
+						}
+						ajaxPost(url, params, function(data){
+							if(data.detail != undefined){
+			      		mxUtils.alert(data.detail[0])
+				    	}else{
+				    		mxUtils.alert('绑定子图成功')
+				    		location.reload();
+								parent.location.reload();
+				    	}
+						})
+					}
+
+					//解绑
+					function deleteRelation(graph_id, child_garph_id, cell_id, callback){
+						var url = BASE_API_DATA + '/mx/unbind_subgraph';
+						var params = {
+						    "graph_id": graph_id,
+						    "attribute_id": cell_id,
+						    "subordinate_id": child_garph_id,
+						    "creator": userName
+						}
+						 ajaxPost(url, params, function(data){
+							if(data.detail != undefined){
+								mxUtils.alert(data.detail[0])
+							}else if(data == '解绑成功'){
+								mxUtils.alert(data)
+							  location.reload()	;
+							  parent.location.reload();
+							}
+							
+						})
+						 // var request = new XMLHttpRequest(); // 新建XMLHttpRequest对象
+						 // request.onreadystatechange = function () { // 状态发生变化时，函数被回调
+							// 	    if (request.readyState === 4) { // 成功完成
+							// 	        // 判断响应结果:
+							// 	        if (request.status === 200) {
+							// 	            // 成功，通过responseText拿到响应的文本:
+							// 	            mxUtils.alert('解绑成功！')
+							// 	            callback(true)
+							// 	        } else {
+							// 	            // 失败，根据响应码判断失败原因:
+							// 	            mxUtils.alert('解绑失败！')
+							// 	            callback(false)
+							// 	        }
+							// 	    } else {
+							// 	        // HTTP请求还在继续...
+							// 	    }
+							// 	}
+
+							// 	// 发送请求:
+							// 	request.open('POST', url);
+							// 	request.setRequestHeader('Content-Type','application/json')
+							// 	request.send(JSON.stringify(params));
+					}
+			    //ajax post
+					function ajaxPost(url, data, callback){
+						var xhr = new XMLHttpRequest();
+					  xhr.open('POST', url, true);
+					  xhr.setRequestHeader('Content-type', 'application/json');
+					  xhr.send(JSON.stringify(data));
+					  xhr.onreadystatechange = function () {
+					    if (xhr.readyState == 4 && xhr.status == 200) {
+					    		callback(JSON.parse(xhr.response));
+					    }
+					  }
+					}
+					//ajax get
+					function ajaxGet(url, callback){
+						var xhr = new XMLHttpRequest();
+					  xhr.open('GET', url, true);
+					  xhr.send();	
+					  xhr.onreadystatechange = function () {
+					    if (xhr.readyState == 4 && xhr.status == 200) {
+					    		callback(JSON.parse(xhr.response));
+					    }
+					  }
+					}
+
+						/**
+					 * 分页函数
+					 * pageNum--页数
+					 * pageSize--每页显示记录数
+					 * 分页部分是从真实数据行开始，因而存在加减某个常数，以确定真正的记录数
+					 * 纯js分页实质是数据行全部加载，通过是否显示属性完成分页功能
+					 **/
+					function pagination(pageNum, pageSize, datasTotal, domBox){
+						// var dom_ul = document.getElementById('childList-ul');
+					  var dataNum = datasTotal;//所有数据数
+					  var totalPage = 0;//总页数
+					  var currentPageSize = pageSize;//每页显页数
+					  //总共分几页
+					  if(dataNum/currentPageSize > parseInt(dataNum/currentPageSize)){
+					      totalPage=parseInt(dataNum/currentPageSize)+1;
+					    }else{
+					      totalPage=parseInt(dataNum/currentPageSize);
+					    }
+					  var currentPage = pageNum;//当前页数
+					  var startRow = (currentPage - 1) * currentPageSize+1;//开始显示的行 31
+					    var endRow = currentPage * currentPageSize;//结束显示的行  40
+					    endRow = (endRow > dataNum)? dataNum : endRow;  //40
+					    console.log(endRow);
+					    //遍历显示数据实现分页
+					  for(var i=1;i<(dataNum+1);i++){
+					  	var ili = domBox.childNodes[i];
+					  	// console.log(ili, 'ili')
+					    if(i>=startRow && i<=endRow){
+					      ili.style.display = "block";
+					    }else{
+					      ili.style.display = "none";
+					    }
+					  }
+					  var temp_Dom = document.createElement('p');
+					  var tempStr = "共"+dataNum+"条 共"+totalPage+"页 当前第"+currentPage+"页";
+					  temp_Dom.innerHTML = tempStr;
+					  var home_page = document.createElement('a');
+						home_page.className = 'page-a';
+						home_page.innerHTML = '首页'
+						var pre_page = document.createElement('a');
+					  pre_page.className = 'page-a';
+						pre_page.innerHTML = '上一页';
+						temp_Dom.appendChild(home_page);
+					  temp_Dom.appendChild(pre_page);
+
+					  var next_page = document.createElement('a');
+						next_page.className = 'page-a';
+						next_page.innerHTML = '下一页';
+						
+						var last_page = document.createElement('a');
+					  last_page.className = 'page-a';
+						last_page.innerHTML = '尾页';
+
+						temp_Dom.appendChild(next_page);
+					  temp_Dom.appendChild(last_page);
+					  let lis = document.createElement('li');
+					  lis.className = 'page-li';
+					  lis.appendChild(temp_Dom);
+					  domBox.appendChild(lis);
+
+					  if(currentPage>1){
+					  	mxEvent.addListener(home_page, 'click', function(evt){
+					  		domBox.removeChild(domBox.lastChild);
+					  		pagination(1, pageSize, datasTotal, domBox);
+					  	})
+					  	mxEvent.addListener(pre_page, 'click', function(evt){
+					  		domBox.removeChild(domBox.lastChild);
+					  		pagination((currentPage-1), pageSize, datasTotal, domBox);
+					  	})
+					  }else{
+					  	home_page.className = 'page-a no-data-click'
+					  	pre_page.className = 'page-a no-data-click'
+					  }
+
+					  if(currentPage<totalPage){
+					  	mxEvent.addListener(next_page, 'click', function(evt){
+					  		domBox.removeChild(domBox.lastChild);
+					  		pagination((currentPage+1), pageSize, datasTotal, domBox);
+					  	})
+					  	mxEvent.addListener(last_page, 'click', function(evt){
+					  		domBox.removeChild(domBox.lastChild);
+					  		pagination((totalPage), pageSize, datasTotal, domBox);
+					  	})
+					  }else{
+					  	last_page.className = 'page-a no-data-click'
+					  	next_page.className = 'page-a no-data-click'
+					  }
+					  
+					}
+		    }, false);
+
+			}
+		};
+		
+
+		// function getUrlParam(paraName) {
+		// 　var url = document.location.toString();
+		// console.log(url, 'url',paraName, 'paraName')
+		// 　var arrObj = url.split("?");
+		// 　if (arrObj.length > 1) {
+		// 	　var arrPara = arrObj[1].split("&");
+		// 	　var arr;
+
+		// 		for (var i = 0; i < arrPara.length; i++) {
+		// 			arr = arrPara[i].split("=");
+		// 			if (arr != null && arr[0] == paraName) {
+		// 				return arr[1];
+		// 			}
+		// 		}
+		// 			return "";
+		// 		}
+		// 	else {
+		// 		return "";
+		// 	}
+		// };
+		
+	</script>
+
+<style>
+	body, html{
+		height:100%;
+	}
+		.geDiagramContainer{
+			border:none;
+			height: 100%;
+		}
+		.nodeUlStyle{
+			padding:0;
+		}
+		.nodeUlStyle li{
+		  	border-bottom: solid 1px #d3cfcf;
+		  	overflow: hidden;
+		  	padding:6px 8px;
+		  	min-width: 280px;
+		}
+		.nodeUlStyle li.addChildGraph_li{
+			text-align: right;
+		}
+		.nodeUlStyle li.addChildGraph_li a{
+			display: inline-block;
+			padding:0 8px;
+			width:60px;
+			height: 30px;
+			line-height: 30px;
+			background: #6c9ff7;
+			color:#fff;
+			border-radius: 3px;
+			font-size:14px;
+			text-decoration: none;
+		}
+		/*.nodeUlStyle li.addChildGraph_li a:hover{
+			background: #1a3f83
+		}*/
+		.nodeUlStyle li:last-child{
+			border-bottom: none;
+		}
+		.nodeUlStyle li span{
+			float:left;
+			line-height: 25px;
+			font-size:14px;
+			color:#fff;
+		}
+		.nodeUlStyle li span:first-child{
+			width:30%;
+			max-width:200px;
+		}
+		.nodeUlStyle li span:nth-child(2){
+			padding-left:5px;
+			width:68%;
+			max-width:450px;
+			text-align: left;
+		}
+		.nodeUlStyle.child-node-ul li{
+			line-height: 30px;
+			color:#000;
+			font-size: 14px;
+			overflow: hidden;
+		}
+		.nodeUlStyle.child-node-ul li:first-child{
+			text-align: left;
+		}
+		.nodeUlStyle.child-node-ul li:first-child .child-see-a{
+			background-color: #00c3a3;
+		}
+		.nodeUlStyle.child-node-ul li.page-li{
+			text-align: center;
+		}
+		.nodeUlStyle.child-node-ul li.page-li {
+			margin:0;
+		}
+		.nodeUlStyle.child-node-ul li.page-li .page-a{
+			display: inline-block;
+			padding:0px 5px; 
+			margin:0 5px;
+			line-height: 20px;
+			border: solid 1px #d3cfcf;
+			border-radius: 3px;
+		}
+		.nodeUlStyle.child-node-ul li.page-li .page-a:hover{
+			background-color: #6c9ff7;
+			color:#fff;
+		}
+		.nodeUlStyle.child-node-ul li.page-li .page-a:first{
+			margin-left:28px;
+		}
+		.nodeUlStyle.child-node-ul li.page-li .page-a.no-data-click, .nodeUlStyle.child-node-ul li.page-li .page-a.no-data-click:hover{
+			background-color: #eee;
+			color:#999;
+		}
+		
+		.nodeUlStyle.child-node-ul li.li-no-data{
+			text-align: center;
+		}
+		.nodeUlStyle.child-node-ul li span{
+			color:#000;
+		}
+		.child-see-a{
+			display: inline-block;
+			margin-left:12px;
+			text-decoration: none;
+		}
+		.child-see-a.child-right{
+			float: right;
+		}
+		.attactButStyle,.child-see-a{
+			background: #6c9ff7;
+			border:none;
+			padding:5px 10px;
+			/*height: 20px;*/
+			line-height: 1;
+			border-radius: 3px;
+			margin:0 0 0 10px;
+			color:#fff;
+		}
+		.closeBtn{
+			display: inline-block;
+			position: absolute;
+			right:8px;
+			top:8px;
+			width:18px;
+			height: 18px;
+			background:#000 url('images/close.png') no-repeat center center;
+			z-index:6;
+		}
+		.closeBtn.close-child-div{
+			/*width:16px;
+			height: 16px;*/
+			/*background-color: #000000;*/
+		}
+		.mark-bg{
+			position: absolute;
+			width:100%;
+			height: 100%;
+			top:0;
+			left: 0;
+			background: #eeeeee;
+			opacity: 0.8;
+			z-index: 10;
+		}
+		.layout-container{
+			width:40%;
+			min-height: 220px;
+			max-height: 480px;
+			position: absolute;
+			left:50%;
+			top:50%;
+			margin-left:-25%;
+			margin-top:-18%;
+			padding:8px;
+			box-sizing: border-box;
+			background: #ffffff;
+			z-index:13;
+			box-shadow:1px 1px 3px -1px #999;
+			border-radius:3px;
+			border:solid #ccc 1px;
+			overflow:hidden;
+		}
+		.layout-container ul{
+		}
+		
+
+	</style>
+</head>
+<!-- Page passes the container for the graph to the program -->
+<!--  -->
+<body onload="main(document.getElementById('graphContainer'))" class="geEditor">
+	<!-- Creates a container for the graph with a grid wallpaper -->
+	<div id="graphContainer" style="overflow:hidden;width:100%;background:none;cursor:default; text-align: center;">
+
+	</div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+@import "sassCore/base"; //sass 外库
+@import "sassCore/ext/animate/bounce";
+@import "sassCore/ext/animate/flip";
+
+@import "base/variable";
+@import "base/mixin"; //studyData mixin 文件
+@import "base/base";  //studyData html css 基础文件 style
+@import "base/iconfont";
+@import "base/common_style";//公共样式
+@import "base/header"; //头部样式
+
+@import "pages/common/wrong_page"; //报错页面
+@import "pages/common/form"; //表单相关style
+@import "pages/show_data/show_page"; //表单相关style
+@import "graph_scss/graph_editor"; //表单相关style
+
+
